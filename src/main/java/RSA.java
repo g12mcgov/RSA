@@ -1,12 +1,15 @@
-/**
- * Created by grantmcgovern on 1/13/15.
+/*
+ * Author: Grant McGovern
+ * Date: 1/13/15
+ *  
+ * Description: This class implements several RSA constructors, along with an encryption() and decryption() method
+ * 
  */
 
 import java.io.*;
 import java.math.BigInteger;
 import java.io.IOException;
 import java.util.Scanner;
-import java.net.URL;
 
 public class RSA {
     public static BigInteger N;
@@ -38,50 +41,60 @@ public class RSA {
                 break;
         }
         
+        /* Set our value of N = pq */
         N = p.multiply(q);
+        /* Set our value of s = (p-1)(q-1) */
         s = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
-        e = ModularArithmetic.genPrime(s.bitLength());
+        /* Set e = some random prime BigInteger where e is 1 < e < s */
+        e = ModularArithmetic.genPrime(s.bitLength()-2);
+        
         packet = ModularArithmetic.extendedEuclid(s, e);
 
+        /* 
+         * Here we check to see if the GCD = 1. If it doesn't and e is greater than s,
+         * recompute both the GCD and e.
+         */
         while(!packet[2].equals(BigInteger.ONE) && !(e.compareTo(s) == -1)) {
-            e = ModularArithmetic.genPrime(s.bitLength());
+            e = ModularArithmetic.genPrime(s.bitLength()-2);
             packet = ModularArithmetic.extendedEuclid(s, e);
-
         }
-        //System.out.println(e.modInverse(s));
 
+        /* Obtain a value for d */
         d = ModularArithmetic.moddiv(BigInteger.ONE, e, s);
-        
-        //BigInteger[] val = ModularArithmetic.extendedEuclid(s, e);
-        //d = val[1];
 
         /* In the case d is negative, handle it. */
         if(d.compareTo(BigInteger.ZERO) == -1) d = d.add(s);
         
+        /* Outputs the Public Key */
         System.out.println("Public Key: " + e);
 
         /* Debug */
-        System.out.println("p: " + p);
-        System.out.println("q: " + q);
-        System.out.println("n: " + N);
-        System.out.println("s: " + s);
-        System.out.println("e: " + e);
-        System.out.println("d: " + d);
+        printValues(p, q, N, s, e, d);
 
     }
 
-    
+    /* 
+     *  RSA(int, String, String)
+     * 
+     *  ~ This method constructs an RSA object, given a specific input, n. 
+     *    It also generates and reads out the private and public keys to the
+     *    filenames passed in. It expects the privateFile to be the first arg
+     *    and the publicFile to be the second arg.
+     */
     public RSA(int n, String privateFile, String publicFile) throws IOException { 
         /* Borrows constructor definition from above */
         this(n);
         
+        /* Wrapped in a try/catch block to handle and report any I/O errors */
         try {
+            /* Simple File IO, opening it, etc... */
             File privateDirectory = new File(".");
             File publicDirectory = new File(".");
             
             File pri = new File(privateDirectory.getCanonicalFile() + File.separator + privateFile);
             File pub = new File(publicDirectory.getCanonicalFile() + File.separator + publicFile);
             
+            /* If our file doesn't exist, create it */
             if(!pri.exists() || !pub.exists()) {
                 pri.createNewFile();
                 pub.createNewFile();
@@ -92,13 +105,16 @@ public class RSA {
             
             BufferedWriter privateBufferedWriter = new BufferedWriter(privateWriter);
             BufferedWriter publicBufferedWriter = new BufferedWriter(publicWriter);
-
+            
+            /* Write out the N value for both keys */
             privateBufferedWriter.write(String.valueOf(this.N)+"\n");
             publicBufferedWriter.write(String.valueOf(this.N)+"\n");
             
+            /* Write out privateKey, then publicKey */
             privateBufferedWriter.write(String.valueOf(this.d));
             publicBufferedWriter.write(String.valueOf(this.e));
             
+            /* Lastly, close our files */
             privateBufferedWriter.close();
             publicBufferedWriter.close();
             
@@ -134,20 +150,20 @@ public class RSA {
         }
     }
 
-    /* For a given integer c < N, use the private key to return the decrypted message
-       c = m^e (mod N)
+    /* 
+     * For a given integer c < N, use the private key to return the decrypted message
+     * c = m^e (mod N)
      */
     public BigInteger encrypt(BigInteger m, BigInteger N, BigInteger e) {
         BigInteger encrypted_message = ModularArithmetic.modexp(m, e, N);
         return encrypted_message;
     }
 
-    /* For an integer c < N, use the private key to return the decrypted message
-       m = c^d (mod N)
+    /* 
+     * For an integer c < N, use the private key to return the decrypted message
+     * m = c^d (mod N)
      */
     public BigInteger decrypt(BigInteger c) {
-        //BigInteger l = new BigInteger("2632626703453331370625164169676227306676274812042680265181549782784364195103381960876771897212046308653212370641672788861398031781992474390970885498200736580812304184316620248968732539556744108037824617685198813363633091779750845943725007674980805475865955715271713057943525038638383585986601364875911505416453760755804479696954296937397913480047334351469859735742110423099194196183308106572490045846418859980569319850459193411666408459173440055686473511381539775510608718051315363903987979912166186929128792186839712312738034783371542860880071795347799817450669225939358336636218363468275013700785414884564592973097191319187456249");
-        //BigInteger q = new BigInteger("3619131669228653945441135947905405219110746986064840788153530492206904588344706512253421713504358967205702112814602852284267624424823301352321151331460867647836755829943558718509765119008535914181248077582167378983678564807613707976423759469094146481086588269261774745440611934655096472647170808367144452789736894169051956843244284375362161178780827321771920099780147848060221557035815010174232504327293053304318809640652426995960782556817962704412051019261431632365459052733091134964815852029087682390458643505868404343276650031238304582919143040655417332673141603475503121930776470067414505305994657675480618864214489886469263113");
         BigInteger decrypted_message = ModularArithmetic.modexp(c, this.d, this.N);
         return decrypted_message;
     }
@@ -155,7 +171,9 @@ public class RSA {
     /*
      * paddingScheme(string message)
      * 
-     * ~ Takes in a message and encodes using the following padding scheme below. As provided by Dr. Pauca.
+     * ~ Takes in a message and encodes using the following padding scheme below.
+     * 
+     * via @Dr.Pauca 
      */
     public BigInteger paddingScheme(String message) {
         int c;
@@ -169,7 +187,14 @@ public class RSA {
         
         return new BigInteger(intMessage);
     }
-    
+
+    /*
+     * depaddingScheme(string message)
+     * 
+     * ~ Takes in a message and decodes using the following depadding scheme below.
+     * 
+     * via @Dr. Pauca
+     */
     public String depaddingScheme(BigInteger msg) {
         //String encodedMessage = msg.toString();
 
@@ -181,9 +206,7 @@ public class RSA {
             System.exit(0);
         }
         else if (encodedMessage.length() % 3 == 2)
-        {
             encodedMessage = "0"+encodedMessage;
-        }
         
         String decryptedMessage = "";
         int a = 0;
@@ -201,6 +224,19 @@ public class RSA {
         }
         
         return decryptedMessage;
+    }
+    
+    /* 
+     * A simple helper method to display values of p, q, N, s, e, & d.
+     * (mainly to be used via debugging)
+     */
+    public void printValues(BigInteger p, BigInteger q, BigInteger N, BigInteger s, BigInteger e, BigInteger d) {
+        System.out.println("p: " + p);
+        System.out.println("q: " + q);
+        System.out.println("n: " + N);
+        System.out.println("s: " + s);
+        System.out.println("e: " + e);
+        System.out.println("d: " + d);
     }
 
 }
