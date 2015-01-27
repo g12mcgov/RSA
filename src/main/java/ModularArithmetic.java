@@ -73,6 +73,10 @@ public class ModularArithmetic {
         return res;
     }
 
+    /* isPrime()
+     *
+     * ~ Determines whether a BigInteger N is prime, within a certain probability
+     */
     public static boolean isPrime(BigInteger N, int k) {
         BigInteger NEGONE = new BigInteger("-1");
         
@@ -109,7 +113,5 @@ public class ModularArithmetic {
         return new BigInteger(n, 100, rand);
         
     }
-
-
 }
 
