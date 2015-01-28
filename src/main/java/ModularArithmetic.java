@@ -43,7 +43,10 @@ public class ModularArithmetic {
      *       algorithm, as discussed on Wikipedia.
      *       
      *       ~ Link: http://en.wikipedia.org/wiki/Modular_exponentiation
-     *             
+     *
+     * ATTENTION: Me and Gaurav Sheni worked together on figuring out this method (mainly 
+     *            translating it from Wikipedia to suit our needs.
+     *
      */
     public static BigInteger modexp(BigInteger a, BigInteger b, BigInteger N) {
         BigInteger c = BigInteger.ONE; 
@@ -67,8 +70,8 @@ public class ModularArithmetic {
     public static BigInteger moddiv(BigInteger a, BigInteger b, BigInteger N) {
         /* Retrieves a packet containing the GCD, and the two coefficients (x, y) such that the following equation is satisfied */
         BigInteger[] gcd = extendedEuclid(N, b);
-
-
+        
+        /* gcd[1] is equal to the y-value, otherwise known as the inverse */
         BigInteger c = a.multiply(gcd[1].mod(N)).mod(N);
 
         return c;
@@ -79,28 +82,31 @@ public class ModularArithmetic {
      * ~ Multiplies two BigInteger values and Mods by N
      */
     public static BigInteger[] extendedEuclid(BigInteger a, BigInteger b) {
+        BigInteger[] container;
+        
         /*
-         * res[0] = x
-         * res[1] = y
-         * res[2] = d
+         * container[0] = x
+         * container[1] = y
+         * container[2] = d  <-- This is the GCD 
          * ax + by = d = gcd(a, b)
          */
+         container = new BigInteger[3];
         
-        BigInteger[] res = new BigInteger[3];
-
+        /* Following the algorithm defined in the textbook... */
         if (b.compareTo(BigInteger.ZERO) == 0) {
-            res[0] = BigInteger.ONE;
-            res[1] = BigInteger.ZERO;
-            res[2] = a;
+            container[0] = BigInteger.ONE;
+            container[1] = BigInteger.ZERO;
+            container[2] = a;
         }
         else {
+            /* Recursively call extendedEuclid(), as described in the book */
             BigInteger[] packet = extendedEuclid(b, a.mod(b));
-            res[0] = packet[1];
-            res[1] = packet[0].subtract(packet[1].multiply(a.divide(b)));
-            res[2] = packet[2];
+            container[0] = packet[1];
+            container[1] = packet[0].subtract(packet[1].multiply(a.divide(b)));
+            container[2] = packet[2];
         }
 
-        return res;
+        return container;
     }
 
     /* isPrime()
@@ -114,16 +120,20 @@ public class ModularArithmetic {
             Random rand = new Random(Integer.MAX_VALUE);
             BigInteger upperLimit = N.add(NEGONE);
 
-            BigInteger a;
-
+            BigInteger c;
+            
+            /* 
+             * Constantly generates a random Integer of N-1 bit length, until it finds one that suits the spec
+             */
             do {
-                a = new BigInteger(upperLimit.bitLength(), rand);
+                c = new BigInteger(upperLimit.bitLength(), rand);
             }
-            while (a.compareTo(upperLimit) >= 0);
+            while (c.compareTo(upperLimit) >= 0);
+            
+            /* If for whatever reason our range begins at 0, add 1 to it */
+            if (c.mod(N).equals(BigInteger.ZERO)) c.add(BigInteger.ONE);
 
-            if (a.mod(N).equals(BigInteger.ZERO)) a.add(BigInteger.ONE);
-
-            BigInteger exp = ModularArithmetic.modexp(a, N.subtract(BigInteger.ONE), N);
+            BigInteger exp = ModularArithmetic.modexp(c, N.subtract(BigInteger.ONE), N);
 
             if (!exp.equals(BigInteger.ONE)) return false;
 

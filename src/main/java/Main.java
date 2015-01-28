@@ -5,7 +5,7 @@ import java.math.BigInteger;
  * Created by grantmcgovern on 1/24/15.
  */
 
-public class Test {
+public class Main {
     public static void main(String[] args) throws IOException {
         RSA rsa = new RSA(1048, "privateKey.txt", "publicKey.txt");
 

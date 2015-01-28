@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class RSA {
+    /* N value */
     public static BigInteger N;
     
     /* Private Key */
@@ -28,25 +29,23 @@ public class RSA {
         /* Initialize BigInteger Variables */
         BigInteger p = ModularArithmetic.genPrime(n);
         BigInteger q = ModularArithmetic.genPrime(n);
+        
+        /* If p & q are the same, generate new ones */
+        while(p.equals(q)) {
+            p = ModularArithmetic.genPrime(n);
+            q = ModularArithmetic.genPrime(n);
+        }
+        
         BigInteger s;
         BigInteger[] packet;
         
-        /* Assign p & q -- Ensures they are distinct */
-        while(true) {
-            if(p.equals(q)) {
-                p = ModularArithmetic.genPrime(n);
-                q = ModularArithmetic.genPrime(n);
-            }
-            else
-                break;
-        }
         
         /* Set our value of N = pq */
         N = p.multiply(q);
         /* Set our value of s = (p-1)(q-1) */
         s = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
         /* Set e = some random prime BigInteger where e is 1 < e < s */
-        e = ModularArithmetic.genPrime(s.bitLength()-2);
+        e = ModularArithmetic.genPrime(s.bitLength() - 2);
         
         packet = ModularArithmetic.extendedEuclid(s, e);
 
@@ -55,7 +54,7 @@ public class RSA {
          * recompute both the GCD and e.
          */
         while(!packet[2].equals(BigInteger.ONE) && !(e.compareTo(s) == -1)) {
-            e = ModularArithmetic.genPrime(s.bitLength()-2);
+            e = ModularArithmetic.genPrime(s.bitLength() - 2);
             packet = ModularArithmetic.extendedEuclid(s, e);
         }
 
@@ -145,8 +144,8 @@ public class RSA {
 
             sc.close();
         }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
+        catch (FileNotFoundException err) {
+            err.printStackTrace();
         }
     }
 
