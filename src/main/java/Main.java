@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.operations.Mod;
+
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -8,6 +10,11 @@ import java.math.BigInteger;
 public class Main {
     public static void main(String[] args) throws IOException {
         RSA rsa = new RSA(1048, "privateKey.txt", "publicKey.txt");
+
+//        BigInteger publicKey = rsa.e;
+//        BigInteger N = rsa.N;
+        
+        //rsa.encryptFile("grantmcgovern.txt", N, publicKey);
 
 //        /* Apply a simple padding scheme to encode message */
 //        String message = "grant is very cool";

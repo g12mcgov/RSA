@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class RSA {
     /* N value */
     public static BigInteger N;
-    
+
     /* Private Key */
     private static BigInteger d;
     /* Public Key */
@@ -35,7 +35,7 @@ public class RSA {
             p = ModularArithmetic.genPrime(n);
             q = ModularArithmetic.genPrime(n);
         }
-        
+
         BigInteger s;
         BigInteger[] packet;
         
@@ -46,7 +46,7 @@ public class RSA {
         s = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
         /* Set e = some random prime BigInteger where e is 1 < e < s */
         e = ModularArithmetic.genPrime(s.bitLength() - 2);
-        
+
         packet = ModularArithmetic.extendedEuclid(s, e);
 
         /* 
@@ -89,7 +89,7 @@ public class RSA {
             /* Simple File IO, opening it, etc... */
             File privateDirectory = new File(".");
             File publicDirectory = new File(".");
-            
+
             File pri = new File(privateDirectory.getCanonicalFile() + File.separator + privateFile);
             File pub = new File(publicDirectory.getCanonicalFile() + File.separator + publicFile);
             
@@ -98,10 +98,10 @@ public class RSA {
                 pri.createNewFile();
                 pub.createNewFile();
             }
-            
+
             FileWriter privateWriter = new FileWriter(pri.getAbsoluteFile());
             FileWriter publicWriter = new FileWriter(pub.getAbsoluteFile());
-            
+
             BufferedWriter privateBufferedWriter = new BufferedWriter(privateWriter);
             BufferedWriter publicBufferedWriter = new BufferedWriter(publicWriter);
             
@@ -116,7 +116,7 @@ public class RSA {
             /* Lastly, close our files */
             privateBufferedWriter.close();
             publicBufferedWriter.close();
-            
+
         } catch (IOException err) {
             err.printStackTrace();
         }
@@ -138,7 +138,7 @@ public class RSA {
             
             /* Pulls off the second value from the file, which is the private key */
             BigInteger privateKey = sc.nextBigInteger();
-            
+
             System.out.println("Read in Private Key: " + privateKey);
             this.d = privateKey;
 
@@ -166,7 +166,7 @@ public class RSA {
         BigInteger decrypted_message = ModularArithmetic.modexp(c, this.d, this.N);
         return decrypted_message;
     }
-    
+
     /*
      * paddingScheme(string message)
      * 
@@ -183,7 +183,7 @@ public class RSA {
             c = message.charAt(i);
             intMessage = intMessage + String.format("%1$03d", c);
         }
-        
+
         return new BigInteger(intMessage);
     }
 
@@ -206,7 +206,7 @@ public class RSA {
         }
         else if (encodedMessage.length() % 3 == 2)
             encodedMessage = "0"+encodedMessage;
-        
+
         String decryptedMessage = "";
         int a = 0;
         int b = 0;
@@ -221,10 +221,10 @@ public class RSA {
             a += (b-48);
             decryptedMessage += (char)a;
         }
-        
+
         return decryptedMessage;
     }
-    
+
     /* 
      * A simple helper method to display values of p, q, N, s, e, & d.
      * (mainly to be used via debugging)
